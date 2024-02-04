@@ -1,4 +1,5 @@
 import mariadb
+import pandas
 
 plateforme_database = mariadb.connect(
     host="localhost",
@@ -26,16 +27,19 @@ class Database:
             autocommit=False,
             database=self.__database
         )
+        return self.database
 
     def request(self, request, updates=False):
-        database, cursor = self.database, self.database.cursor()
+        database = self.__connect()
+        cursor = database.cursor()
         cursor.execute(request)
         database.commit()
         if not updates:
             sel = cursor.fetchall()
-            print(sel)
+            return sel
         cursor.close()
         database.close()
+
 
 class Entreprise(Database):
     def __init__(self):
@@ -46,9 +50,26 @@ class Entreprise(Database):
 
     def get_services(self):
         result = self.request("SELECT * FROM service")
-        print("")
-        for row in result:
-            print(row)
+        organized = pandas.DataFrame(result, columns=["ID", "Name"])
+        print(organized)
+
+    def create_employee(self, **kwargs):
+        self.request(f"INSERT INTO employe (nom, prenom, salaire, id_service) VALUES (\'{kwargs['lastname']}\', \'{kwargs['name']}\', "
+                     f"\'{kwargs['salary']}\', \'{kwargs['service_id']}\')", updates=True)
+
+    def get_employees(self):
+        result = self.request("SELECT * FROM employe")
+        organized = pandas.DataFrame(result, columns=["ID", "Name", "Lastname", "Salary", "ID Service"])
+        print(organized)
+
+    def update_ids(self, table_name):
+        update_request = ["SET @num := 0", f"UPDATE {table_name} SET id = @num := (@num+1)", f"ALTER TABLE {table_name} AUTO_INCREMENT = 1"]
+        for request in update_request:
+            self.request(request, updates=True)
+
 
 entreprise = Entreprise()
+entreprise.create_employee(lastname="Barbieri", name="Mattia", salary=1203, service_id=3)
+entreprise.update_ids("employe")
 entreprise.get_services()
+entreprise.get_employees()
