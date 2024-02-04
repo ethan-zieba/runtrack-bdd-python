@@ -62,14 +62,10 @@ class Entreprise(Database):
         organized = pandas.DataFrame(result, columns=["ID", "Name", "Lastname", "Salary", "ID Service"])
         print(organized)
 
-    def update_ids(self, table_name):
-        update_request = ["SET @num := 0", f"UPDATE {table_name} SET id = @num := (@num+1)", f"ALTER TABLE {table_name} AUTO_INCREMENT = 1"]
-        for request in update_request:
-            self.request(request, updates=True)
-
+    def remove_employee(self, id):
+        self.request(f"DELETE FROM employe WHERE id = {id}", updates=True)
 
 entreprise = Entreprise()
 entreprise.create_employee(lastname="Barbieri", name="Mattia", salary=1203, service_id=3)
-entreprise.update_ids("employe")
 entreprise.get_services()
 entreprise.get_employees()
