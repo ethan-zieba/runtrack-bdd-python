@@ -53,6 +53,12 @@ class Entreprise(Database):
         organized = pandas.DataFrame(result, columns=["ID", "Name"])
         print(organized)
 
+    def update_service(self, id, name):
+        self.request(f"UPDATE service SET name = \'{name}\' WHERE id = {id}", updates=True)
+
+    def remove_service(self, id):
+        self.request(f"DELETE FORM employe WHERE id = {id}", updates=True)
+
     def create_employee(self, **kwargs):
         self.request(f"INSERT INTO employe (nom, prenom, salaire, id_service) VALUES (\'{kwargs['lastname']}\', \'{kwargs['name']}\', "
                      f"\'{kwargs['salary']}\', \'{kwargs['service_id']}\')", updates=True)
@@ -62,10 +68,21 @@ class Entreprise(Database):
         organized = pandas.DataFrame(result, columns=["ID", "Name", "Lastname", "Salary", "ID Service"])
         print(organized)
 
+    def update_employee(self, id, **kwargs):
+        values_to_update = ""
+        for key, value in kwargs.items():
+            values_to_update += f"{key} = \'{value}\', "
+        values_to_update = values_to_update[:-2]
+        self.request(f"UPDATE employe SET {values_to_update} WHERE id = {id}", updates=True)
+
     def remove_employee(self, id):
         self.request(f"DELETE FROM employe WHERE id = {id}", updates=True)
 
-entreprise = Entreprise()
-entreprise.create_employee(lastname="Barbieri", name="Mattia", salary=1203, service_id=3)
-entreprise.get_services()
-entreprise.get_employees()
+
+if __name__ == '__main__':
+    entreprise = Entreprise()
+    entreprise.create_employee(lastname="Barbieri", name="Mattia", salary=1203, service_id=3)
+    entreprise.get_services()
+    entreprise.get_employees()
+    entreprise.update_employee(8, id_service=1)
+    entreprise.get_employees()
