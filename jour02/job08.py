@@ -86,14 +86,21 @@ class Zoo(Database):
         if not self.check_full_cage(id):
             self.request(f"UPDATE cage SET nb_animaux = (SELECT COUNT(*) FROM animaux WHERE cage_id = {id}) WHERE id = {id}", updates=True)
 
+    def total_surface(self):
+        return self.request('SELECT SUM(superficie) FROM cage')[0][0]
+
+    def join_animals_cages(self):
+        return pandas.DataFrame(self.request('SELECT animaux.*, cage.max_capacite, cage.nb_animaux, cage.superficie FROM animaux INNER JOIN cage ON animaux.cage_id = cage.id'), columns=["ID", "Name", "Race", "DoB", "Country", "In cage:", "Max Cap.", "Nb Animals", "Surface"])
+
 
 if __name__ == '__main__':
+    pandas.set_option('display.max_columns', None)
     zoo = Zoo()
     running = True
     while running:
         zoo.get_cages()
         zoo.get_animals()
-        request = int(input('1 - Add an animal\n2 - Remove an animal\n3 - Modify an animal\n'))
+        request = int(input('1 - Add an animal\n2 - Remove an animal\n3 - Modify an animal\n4 - Caculate total cages surface\n'))
         if request == 1:
             cage_id = int(input("In which cage ?: "))
             if not zoo.check_full_cage(cage_id):
@@ -107,6 +114,8 @@ if __name__ == '__main__':
             zoo.update_animal(int(input("Animal's ID: ")), nom=input("Animal's new name: "),
                                   race=input("Animal's race: "), date_naissance=input("Animal's date of birth: "),
                                   pays_origine=input("Animal's origin: "), cage_id=int(input("Animal's cage's id: ")))
-        zoo.get_cages()
-        zoo.get_animals()
+        elif request == 4:
+            print(f"Total surface in dam²: {zoo.total_surface()}")
+        print("\n\n")
+        print(zoo.join_animals_cages())
         running = False if input("Quit ? y/n").lower() == "y" else True
