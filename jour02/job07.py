@@ -57,7 +57,7 @@ class Entreprise(Database):
         self.request(f"UPDATE service SET name = \'{name}\' WHERE id = {id}", updates=True)
 
     def remove_service(self, id):
-        self.request(f"DELETE FORM employe WHERE id = {id}", updates=True)
+        self.request(f"DELETE FROM employe WHERE id = {id}", updates=True)
 
     def create_employee(self, **kwargs):
         self.request(f"INSERT INTO employe (nom, prenom, salaire, id_service) VALUES (\'{kwargs['lastname']}\', \'{kwargs['name']}\', "
@@ -81,8 +81,6 @@ class Entreprise(Database):
 
 if __name__ == '__main__':
     entreprise = Entreprise()
-    entreprise.create_employee(lastname="Barbieri", name="Mattia", salary=1203, service_id=3)
+    entreprise.create_employee(lastname="Luca", name="Dorso", salary=6603, service_id=3)
     entreprise.get_services()
-    entreprise.get_employees()
-    entreprise.update_employee(8, id_service=1)
     entreprise.get_employees()
